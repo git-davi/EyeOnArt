@@ -1,24 +1,11 @@
-# EyeOnArt
-Computer Vision project for painting detection from videos.  
-The videos are captured in the art museum Galleria Estense, Modena.
+import cv2
+import argparse
+import detection
 
-## Requirements
-- Python 2.7
-- `requirements.txt` file for pythnn packages
-
-## Usage
-```shell
-$ python EyeOnArt.py material/test.mp4
-```
-  
-You can create a virtualenv called **venv** in the root dir of the project.  
-It won't be pushed.
-
-
-## Help
-```shell
-usage: EyeOnArt.py [-h] filename
-
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawTextHelpFormatter,
+    description=
+'''
 -------------
 |  EyeOnArt |
 -------------
@@ -50,10 +37,21 @@ Painting Detection project.
 
 Credits :
 Davide Casalini, Robert Covic & Stefano Rossi.
+'''
+)
 
-positional arguments:
-  filename    The filename to the source video you want to elaborate
+parser.add_argument("filename", type=str, help="The filename to the source video you want to elaborate")
 
-optional arguments:
-  -h, --help  show this help message and exit
-```
+args = parser.parse_args()
+
+
+video = cv2.VideoCapture(args.filename)
+
+success, image = video.read()
+while(success) :
+    detection.start(image)
+    success, image = video.read()
+
+
+print "Finished!"
+print "See you soon :)"
