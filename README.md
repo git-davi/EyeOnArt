@@ -4,7 +4,7 @@ The videos are captured in the art museum Galleria Estense, Modena.
 
 ## Requirements
 - Python 2.7
-- `requirements.txt` file for pythnn packages
+- `requirements.txt` file for python packages
 
 ## Usage
 ```shell
