@@ -2,8 +2,10 @@
 Computer Vision project for painting detection from videos.  
 The videos are captured in the art museum Galleria Estense, Modena.
 
-## What To Do
-- Train Yolo to detect the paintings, needed for roi detection part
+## Setup
+Download the weights and cfg file from [here](https://drive.google.com/file/d/1yxGeWfTchxRBUCheJwRFfQpwglqAMOJY/view?usp=sharing).  
+Unzip the directory in the root dir of the project.
+
 
 ## Usage
 ```shell

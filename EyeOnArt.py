@@ -44,11 +44,15 @@ args = parser.parse_args()
 
 
 video = cv2.VideoCapture(args.filename)
-success, image = video.read()
+length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
+success, image = video.read()
+count = 1
 while(success) :
+    print("------ Tasks started on frame {} out of {} ------".format(count, length))
     detection.start(image)
     success, image = video.read()
+    count += 1
 
 
 print("Finished!")
