@@ -53,5 +53,5 @@ while(success) :
     success, image = video.read()
 
 
-print "Finished!"
-print "See you soon :)"
+print("Finished!")
+print("See you soon :)")
