@@ -39,15 +39,13 @@ Credits :
 Davide Casalini, Robert Covic & Stefano Rossi.
 '''
 )
-
 parser.add_argument("filename", type=str, help="The filename to the source video you want to elaborate")
-
 args = parser.parse_args()
 
 
 video = cv2.VideoCapture(args.filename)
-
 success, image = video.read()
+
 while(success) :
     detection.start(image)
     success, image = video.read()

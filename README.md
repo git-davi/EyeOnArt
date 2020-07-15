@@ -2,6 +2,9 @@
 Computer Vision project for painting detection from videos.  
 The videos are captured in the art museum Galleria Estense, Modena.
 
+## What To Do
+- Train Yolo to detect the paintings, needed for roi detection part
+
 ## Usage
 ```shell
 $ python EyeOnArt.py material/test.mp4
