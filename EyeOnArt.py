@@ -1,6 +1,6 @@
 import cv2
 import argparse
-import detection
+import task_runner
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter,
@@ -50,7 +50,7 @@ success, image = video.read()
 count = 1
 while(success) :
     print("------ Tasks started on frame {} out of {} ------".format(count, length))
-    detection.start(image)
+    task_runner.start(image)
     success, image = video.read()
     count += 1
 
