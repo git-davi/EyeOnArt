@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from netloader import *
 
 
 def get_output_layers(net):
@@ -13,22 +12,26 @@ def get_output_layers(net):
 
 def draw_bounding_box(img, classes, class_id, confidence, x, y, x_plus_w, y_plus_h):
 
+    # adjust borders exceding
+    x = 0 if x < 0 else x
+    y = 0 if y < 0 else y
+    x = img.shape[1] if x > img.shape[1] else x
+    y = img.shape[0] if y > img.shape[0] else y
+
     label = str(classes[class_id])
     color = (0, 255, 0)
     cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), color, 2)
     cv2.putText(img, label, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 
-def detect(image) :
-    print("Detecting ROI")
-
+def detect(image, net, classes) :
     Width = image.shape[1]
     Height = image.shape[0]
     scale = 0.00392
 
     blob = cv2.dnn.blobFromImage(image, scale, (416,416), (0, 0, 0), True, crop=False)
-    painting_net.setInput(blob)
-    outs = painting_net.forward(get_output_layers(painting_net))
+    net.setInput(blob)
+    outs = net.forward(get_output_layers(net))
 
     # initializing
     class_ids = []
@@ -69,7 +72,7 @@ def detect(image) :
         w = box[2]
         h = box[3]
         
-        draw_bounding_box(image, painting_classes, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
+        draw_bounding_box(image, classes, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
 
     # debugging purpose
     # display output image    
@@ -78,5 +81,3 @@ def detect(image) :
     cv2.waitKey()
     # release resources
     cv2.destroyAllWindows()
-
-    print("ROI detection completed successfully!")
