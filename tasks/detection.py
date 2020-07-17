@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from tools import box_util
 
 
 def get_output_layers(net):
@@ -46,7 +47,9 @@ def detect(image, net, classes) :
                 y = center_y - h / 2
                 class_ids.append(class_id)
                 confidences.append(float(confidence))
-                boxes.append([x, y, w, h])
+
+                adj_box = box_util.adjust_box(image, x, y, w, h)
+                boxes.append(adj_box)
 
     # apply non-max suppression
     indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)

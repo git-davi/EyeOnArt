@@ -14,7 +14,8 @@ def start(image) :
     #image_util.show(image)
 
     # painting rectification
-    contours.find_countours(image)
+    contours.find_countours(image, painting_boxes)
+
 
     # painting retrieval
 

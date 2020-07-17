@@ -8,16 +8,26 @@ def box_drawer(img, boxes, color, label) :
         w = box[2]
         h = box[3]
 
-        draw_bounding_box(img, label, color, round(x), round(y), round(x+w), round(y+h))
+        draw_bounding_box(img, label, color, x, y, x+w, y+h)
 
 
-def draw_bounding_box(img, label, color, x, y, x_plus_w, y_plus_h):
+def adjust_box(img, x, y, w, h) :
+    
+    x = round(x)
+    y = round(y)
+    w = round(w)
+    h = round(h)
 
     # adjust borders exceding
     x = 5 if x <= 0 else x
     y = 5 if y <= 0 else y
-    x_plus_w = img.shape[1] - 5 if x_plus_w >= img.shape[1] else x_plus_w
-    y_plus_h = img.shape[0] - 5 if y_plus_h >= img.shape[0] else y_plus_h
+    w = img.shape[1] - x - 5 if x + w >= img.shape[1] else w
+    h = img.shape[0] - y - 5 if y + h >= img.shape[0] else h
+
+    return [x, y, w, h]
+    
+
+def draw_bounding_box(img, label, color, x, y, x_plus_w, y_plus_h):
 
     cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), color, 2)
     cv2.putText(img, label, (x+10,y+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
