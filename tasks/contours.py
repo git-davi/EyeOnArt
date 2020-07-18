@@ -1,6 +1,9 @@
 import cv2
-from tools import image_util
 import numpy as np
+
+from tools import image_util
+from tools import geom
+
 
 
 def contour(image) :
@@ -17,25 +20,20 @@ def contour(image) :
     hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
     hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
 
+    
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 0.01)
-    _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    # scale lines for kmeans
+    lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
+    lines[:, :, 1], min_theta, max_theta = geom.feature_scaling(lines[:, :, 1])
 
-    '''
-    for line in lines :
-        for rho,theta in line :
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a*rho
-            y0 = b*rho
-            x1 = int(x0 + 1000*(-b))
-            y1 = int(y0 + 1000*(a))
-            x2 = int(x0 - 1000*(-b))
-            y2 = int(y0 - 1000*(a))
-            
-            cv2.line(image,(x1,y1),(x2,y2),(0, 0, 255), 1)
-    '''
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.01)
+    _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    
+    # lines descaling
+    cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )
+    cluster_lines[:, 1] = geom.feature_descaling(cluster_lines[:, 1], min_theta, max_theta )
+    
 
     for rho,theta in cluster_lines :
         a = np.cos(theta)
