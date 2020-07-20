@@ -20,7 +20,7 @@ def contour(image) :
     hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
     hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
     image_util.show(hull_mask)
-    hull_mask_dilated = cv2.dilate(hull_mask, None, iterations=1)
+    #hull_mask_dilated = cv2.dilate(hull_mask, None, iterations=1)
     
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
