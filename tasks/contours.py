@@ -23,12 +23,19 @@ def contour(image) :
     
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
+    if lines is None :
+        # try matching with all roi
+        return image
+
     # scale lines for kmeans
     lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
     lines[:, :, 1], min_theta, max_theta = geom.feature_scaling(lines[:, :, 1])
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.01)
-    _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    try :
+        _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    except Exception :
+        return image
     
     # lines descaling
     cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )

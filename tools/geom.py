@@ -29,6 +29,9 @@ def feature_scaling(features) :
     _min = np.amin(features)
     _max = np.amax(features)
 
+    if _max == _min :
+        return features, _min, _max
+
     features = ( features - _min ) / ( _max - _min )
 
     return features, _min, _max
