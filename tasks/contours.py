@@ -84,7 +84,7 @@ def rectified_points(tr,tl,br,bl,dist_lines):
 #x points
     xl,xr= tl[0],tr[0] if (top > bottom) else bl[0],br[0]
 #y points
-    yl,yr= tl[0],bl[0] if (left > right) else tr[0],br[0]
+    yl,yr= tl[1],bl[1] if (left > right) else tr[1],br[1]
 
     return xl,xr,yl,yr
  
