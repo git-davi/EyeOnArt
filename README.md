@@ -15,6 +15,12 @@ $ python EyeOnArt.py material/test.mp4
 You can create a virtualenv called **venv** in the root dir of the project.  
 It won't be pushed.
 
+## Pattern Matching Usage
+```shell
+$ python Pattern.py
+```
+
+See the file ```Pattern.py``` for more info. 
 
 ## Help
 ```shell
