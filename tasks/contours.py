@@ -64,14 +64,15 @@ def contour(image) :
     transform, _ = cv2.findHomography(ordered_points, rect_points)
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
-    image_util.show(image)
-
     rounded = np.round(rect_points).astype(int)
     rounded[rounded < 0] = 0
-    cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
-    #image_util.show(cut)
 
-    save_img_cut(cut)
+    image_util.show(warped_image)
+    cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
+    cut = image_util.remove_border(cut, 0.15)
+    image_util.show(cut)
+
+    #save_img_cut(cut)
 
     return cut
 

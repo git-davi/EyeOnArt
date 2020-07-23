@@ -94,3 +94,9 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 
     # return the resized image
     return resized
+
+
+def remove_border(image, scale) :
+    size = np.array(image.shape)
+    border = np.round(size * scale).astype(int)
+    return image[border[0]:size[0]-border[0], border[1]:size[1]-border[1]]
