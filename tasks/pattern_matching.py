@@ -3,16 +3,17 @@ import cv2
 import numpy as np
 from tools import image_util
 
-def im_show():
+def pattern_matching():
     paintings_found = []
     painting_db = 'material/paintings_db/'
     norm_prob = []
     rectified_db = 'rectified_imgs/'
 
     # Leggo l'immagine rettificata e la converto in gray
-    sample = 'rectified_imgs/rectified_45.jpg'
+    sample = 'rectified_imgs/rectified_47.jpg'
     image = cv2.imread(sample)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = image
 
     print(f'[DEBUG] proccessing image {sample}')
 
@@ -25,19 +26,19 @@ def im_show():
 
         try:
             template = cv2.imread(template_path)
-            template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+            #template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         except Exception as e:
             print(e)
             continue
 
-        template = cv2.Canny(template, 50, 200)
-        (tH, tW) = template.shape[:2]
+        #template = cv2.Canny(template, 140, 80)
+        (tH, tW) = gray.shape[:2]
 
         # Loop over the scales
-        for scale in np.linspace(0.2, 1.0, 20)[::-1]:
+        for scale in np.linspace(0.2, 1.0, 10)[::-1]:
             # resize the image according to the scale, and keep track
             # of the ratio of the resizing
-            resized = image_util.resize(gray, width=int(gray.shape[1] * scale))
+            resized = image_util.resize(template, width=int(template.shape[1] * scale))
             r = gray.shape[1] / float(resized.shape[1])
 
             # if the resized image is smaller than the template, then break
@@ -47,8 +48,9 @@ def im_show():
 
             # detect edges in the resized, grayscale image and apply template
             # matching to find the template in the image
-            edged = cv2.Canny(resized, 50, 200)
-            result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
+            #edged = cv2.Canny(resized, 140, 80)
+            edged = gray
+            result = cv2.matchTemplate(edged, resized, cv2.TM_CCORR_NORMED)
             (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)
 
             if found is None or maxVal > found[0]:
@@ -72,10 +74,10 @@ def im_show():
         })
 
     team = list(sorted(paintings_found, key=lambda k: k['maxVal'], reverse=True))[:3]
-    norm = sorted([(float(i) - np.min(norm_prob)) / (np.max(norm_prob) - np.min(norm_prob)) for i in norm_prob], reverse=True)[:3]
+    #norm = sorted([(float(i) - np.min(norm_prob)) / (np.max(norm_prob) - np.min(norm_prob)) for i in norm_prob], reverse=True)[:3]
 
-    for i in range(3):
-        team[i]["maxVal"] = norm[i]
+    #for i in range(3):
+        #team[i]["maxVal"] = norm[i]
 
     print('\n\n')
     for p in team:
@@ -86,11 +88,3 @@ def im_show():
 
     cv2.imshow("Image", image)
     cv2.waitKey(0)
-
-
-
-
-
-
-
-
