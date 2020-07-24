@@ -51,9 +51,7 @@ def remove_fake_people(painting_boxes, people_boxes) :
     return real_people_boxes
 
 def is_bad_cut(cut) :
-    s1, s2 = np.sort(cut.shape[:2])
-    ratio = s2/s1
-
-    if ratio > 5 :
+    s_min, s_max = np.sort(cut.shape[:2])
+    if s_min == 0 or s_max/s_min > 5 :
         return True
     return False

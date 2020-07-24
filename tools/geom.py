@@ -33,12 +33,10 @@ def feature_scaling(features) :
         return features, _min, _max
 
     features = ( features - _min ) / ( _max - _min )
-
     return features, _min, _max
 
 
-def feature_descaling(features, _min, _max) :
-    
+def feature_descaling(features, _min, _max) :   
     return (features * (_max - _min)) + _min
 
 

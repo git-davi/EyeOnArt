@@ -23,8 +23,8 @@ def contour(image) :
     
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
-    if lines is None :
-        # try matching with all roi
+    # try matching with all roi
+    if len(lines) < 4 :
         return image
 
     # scale lines for kmeans
@@ -65,9 +65,11 @@ def contour(image) :
     #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
     
     transform, _ = cv2.findHomography(ordered_points, rect_points)
+    if transform is None :
+        return image
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
-    #image_util.show(image)
+    #image_util.show(warped_image)
 
     rounded = np.round(rect_points).astype(int)
     rounded[rounded < 0] = 0
