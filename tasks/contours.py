@@ -3,7 +3,7 @@ import numpy as np
 
 from tools import image_util
 from tools import geom
-
+from tools import box_util
 
 
 def contour(image) :
@@ -17,66 +17,65 @@ def contour(image) :
     cont = max(contours, key=cv2.contourArea)
     hull = cv2.convexHull(cont)
 
-    hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
+    hull_mask = np.zeros((image.shape[0]*4,image.shape[1]*4, 1), np.uint8)
+    # traslate the mask
+    hull[:, :, 0] = hull[:, :, 0] + round(image.shape[1]/2)
+    hull[:, :, 1] = hull[:, :, 1] + round(image.shape[0]/2)
     hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
-    #image_util.show(hull_mask)
-    
+
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
-    if lines is None :
-        # try matching with all roi
+    # try matching with all roi if less than 4 lines found
+    if len(lines) < 4 :
         return image
 
-    # scale lines for kmeans
-    lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
-    lines[:, :, 1], min_theta, max_theta = geom.feature_scaling(lines[:, :, 1])
-
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.01)
-    try :
-        _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-    except Exception :
-        return image
-    
-    # lines descaling
-    cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )
-    cluster_lines[:, 1] = geom.feature_descaling(cluster_lines[:, 1], min_theta, max_theta )
-    
     # return lines in order t r b l
-    ordered_lines = geom.order_lines(cluster_lines)
-    horizontal_lines = np.array([ordered_lines[0], ordered_lines[2]])
-    vertical_lines = np.array([ordered_lines[1], ordered_lines[3]])
+    border_lines = geom.extract_borders(lines)
+    if border_lines is None :
+        return image
 
-    # debugging
-    #image_util.draw_lines(horizontal_lines, vertical_lines, image)
+    horizontal_lines = np.array([border_lines[0], border_lines[2]])
+    vertical_lines = np.array([border_lines[1], border_lines[3]])
 
     inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
 
+    # traslate back points
+    inters[:, 0] = inters[:, 0] - round(image.shape[1]/2)
+    inters[:, 1] = inters[:, 1] - round(image.shape[0]/2)
+
     #for coord in inters:
     #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
+    #image_util.show(image)
+    
+    #check for duplicates
+    if np.unique(inters).shape != inters.shape :
+        return image
 
     # order points tl tr br bl
     ordered_points = geom.order_points(inters)
-    rect_points = geom.rectify_points(ordered_points, ordered_lines)
+    rect_points = geom.rectify_points(ordered_points, border_lines)
 
     #for point in rect_points :
     #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
-    
+
+    print(rect_points)
+
     transform, _ = cv2.findHomography(ordered_points, rect_points)
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
-
-    #image_util.show(image)
 
     rounded = np.round(rect_points).astype(int)
     rounded[rounded < 0] = 0
 
     cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
-    #image_util.show(cut)
 
     #cut = image_util.remove_border(cut, 0.2)
 
     #save_img_cut(cut)
-
+    #image_util.show(cut)
+    if box_util.is_bad_cut(cut) :
+        return None
     return cut
+
 
 def save_img_cut(img):
     dir_path = 'rectified_imgs/'
@@ -93,5 +92,7 @@ def find_countours(image, boxes) :
     rectified = []
     for box in boxes :
         roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
-        rectified.append(contour(roi))
+        cut = contour(roi)
+        if cut is not None :
+            rectified.append(cut)
     return rectified

@@ -8,7 +8,7 @@ def segmented_intersections(horz,verz):
     for i in range(len(horz)):
         for j in range(len(verz)):
             intersections.append(_intersection(horz[i],verz[j]))
-    return intersections
+    return np.array(intersections)
 
 
 def _intersection(line1, line2):
@@ -71,6 +71,26 @@ def order_lines(lines) :
 
     return np.array([ top, right, bottom, left ])
 
+def extract_borders(lines) :
+    # divide horizontal and vertical lines
+    abs_cos = np.absolute(np.cos(lines[:, :, 1])).flatten()
+    v_lines = lines[abs_cos > 0.5]
+    h_lines = lines[abs_cos <= 0.5]
+
+    h_sort_lines = h_lines[h_lines[:, :, 0].flatten().argsort()]
+    v_sort_lines = v_lines[v_lines[:, :, 0].flatten().argsort()]
+
+    if h_sort_lines.size == 0 or v_sort_lines.size == 0 :
+        return None
+
+    top = h_sort_lines[0]
+    bottom = h_sort_lines[-1]
+    left = v_sort_lines[0]
+    right = v_sort_lines[-1] 
+
+    borders = np.reshape(np.array([ top, right, bottom, left ]), (4, 2))
+
+    return borders
 
 def seg_len(p1, p2):
     x = p2[0] - p1[0]

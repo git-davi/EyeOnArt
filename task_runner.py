@@ -17,11 +17,9 @@ def start(image) :
     print("Rectifing frame and cutting the paintings")
     cuts = contours.find_countours(image, painting_boxes)
 
-
     # painting retrieval
     print("Retrival for painting from DB")
     pattern_matching.match(cuts)
-
 
     # people detection
     print("Detecting ROI for people")
