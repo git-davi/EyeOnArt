@@ -36,7 +36,7 @@ Painting Detection project.
 |/
 
 Credits :
-Davide Casalini, Robert Covic & Stefano Rossi & FernixPORCIODDDDDo
+Davide Casalini, Robert Covic & Stefano Rossi
 '''
 )
 parser.add_argument("filename", type=str, help="The filename to the source video you want to elaborate")

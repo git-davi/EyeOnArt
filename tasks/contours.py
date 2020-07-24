@@ -49,7 +49,10 @@ def contour(image) :
     # debugging
     #image_util.draw_lines(horizontal_lines, vertical_lines, image)
 
-    inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
+    try :
+        inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
+    except Exception :
+        return image
 
     #for coord in inters:
     #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
@@ -70,11 +73,13 @@ def contour(image) :
     rounded[rounded < 0] = 0
 
     cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
-    image_util.show(cut)
+    #image_util.show(cut)
 
-    save_img_cut(cut)
-
+    #save_img_cut(cut)
+    if box_util.is_bad_cut(cut) :
+        return None
     return cut
+
 
 def save_img_cut(img):
     dir_path = 'rectified_imgs/'
@@ -91,4 +96,7 @@ def find_countours(image, boxes) :
     rectified = []
     for box in boxes :
         roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
-        rectified.append(contour(roi))
+        cut = contour(roi)
+        if cut is not None :
+            rectified.append(cut)
+    return rectified
