@@ -70,9 +70,11 @@ def contour(image) :
     rounded[rounded < 0] = 0
 
     cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
-    image_util.show(cut)
+    #image_util.show(cut)
 
-    save_img_cut(cut)
+    #cut = image_util.remove_border(cut, 0.2)
+
+    #save_img_cut(cut)
 
     return cut
 
@@ -92,3 +94,4 @@ def find_countours(image, boxes) :
     for box in boxes :
         roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
         rectified.append(contour(roi))
+    return rectified

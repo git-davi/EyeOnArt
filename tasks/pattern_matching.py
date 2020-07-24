@@ -1,90 +1,67 @@
 import os
+import glob
 import cv2
 import numpy as np
 from tools import image_util
 
-def pattern_matching():
-    paintings_found = []
-    painting_db = 'material/paintings_db/'
-    norm_prob = []
-    rectified_db = 'rectified_imgs/'
 
-    # Leggo l'immagine rettificata e la converto in gray
-    sample = 'rectified_imgs/rectified_47.jpg'
-    image = cv2.imread(sample)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = image
+def match_cut(cut):
+    # debug
+    image_util.show(cut)
 
-    print(f'[DEBUG] proccessing image {sample}')
+    gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
 
-    # Ciclo il db dei paintings
-    for paint in os.listdir(painting_db):
-        found = None
-        print(f'[DEBUG] confronto con {paint}')
+    h, w = gray.shape[:2]
 
-        template_path = painting_db + paint
+    MIN_MATCH_COUNT = 3
+    MAX_MATCH = 0
 
-        try:
-            template = cv2.imread(template_path)
-            #template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        except Exception as e:
-            print(e)
-            continue
+    matches_list = []
 
-        #template = cv2.Canny(template, 140, 80)
-        (tH, tW) = gray.shape[:2]
+    for f in os.listdir("material/paintings_db/"):
+        for file in glob.glob(f'material/paintings_db/{f}'):
 
-        # Loop over the scales
-        for scale in np.linspace(0.2, 1.0, 10)[::-1]:
-            # resize the image according to the scale, and keep track
-            # of the ratio of the resizing
-            resized = image_util.resize(template, width=int(template.shape[1] * scale))
-            r = gray.shape[1] / float(resized.shape[1])
+            template = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
 
-            # if the resized image is smaller than the template, then break
-            # from the loop
-            if resized.shape[0] < tH or resized.shape[1] < tW:
-                break
+            patchSize = 16
 
-            # detect edges in the resized, grayscale image and apply template
-            # matching to find the template in the image
-            #edged = cv2.Canny(resized, 140, 80)
-            edged = gray
-            result = cv2.matchTemplate(edged, resized, cv2.TM_CCORR_NORMED)
-            (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(result)
+            orb = cv2.ORB_create(edgeThreshold = patchSize,
+                                    patchSize = patchSize)
 
-            if found is None or maxVal > found[0]:
-                found = (maxVal, maxLoc, r)
+            kp1, des1 = orb.detectAndCompute(template, None)
+            kp2, des2 = orb.detectAndCompute(gray, None)
 
-        if found is not None:
-            (maxVal, maxLoc, r) = found
-            (startX, startY) = (int(maxLoc[0] * r), int(maxLoc[1] * r))
-            (endX, endY) = (int((maxLoc[0] + tW) * r), int((maxLoc[1] + tH) * r))
+            FLANN_INDEX_LSH = 6
+            index_params= dict(algorithm = FLANN_INDEX_LSH,
+                       table_number = 6,
+                       key_size = 12,
+                       multi_probe_level = 1)
+            search_params = dict(checks = 50)
+            
+            flann = cv2.FlannBasedMatcher(index_params, search_params)
+            matches = flann.knnMatch(des1,des2,k=2)
 
-        norm_prob.append(maxVal)
+            # store all the good matches as per Lowe's ratio test.
+            good = []
+            for pair in matches:
+                if len(pair) == 2:
+                    if pair[0].distance < 0.75*pair[1].distance:
+                        good.append(pair[0])
 
-        print(f'IMG: {paint} - SCORE: {maxVal}')
-        paintings_found.append({
-            'maxVal': maxVal,
-            'startX': startX,
-            'startY': startY,
-            'endX': endX,
-            'endY': endY,
-            'sprite': paint
-        })
+            matches_list.append({
+                'file': f,
+                'score': len(good)
+            })
 
-    team = list(sorted(paintings_found, key=lambda k: k['maxVal'], reverse=True))[:3]
-    #norm = sorted([(float(i) - np.min(norm_prob)) / (np.max(norm_prob) - np.min(norm_prob)) for i in norm_prob], reverse=True)[:3]
+    matches_list = list(sorted(matches_list, key=lambda k: k['score'], reverse=True))
+    
+    print(f'Best match is FILE : {matches_list[0]["file"]}')
+    print(f'SCORE : {matches_list[0]["score"]}')
 
-    #for i in range(3):
-        #team[i]["maxVal"] = norm[i]
+    # debug
+    image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
 
-    print('\n\n')
-    for p in team:
-        cv2.rectangle(image, (p['startX'], p['startY']), (p['endX'], p['endY']), (0, 0, 255), 2)
-        cv2.putText(image, p['sprite'], (p['endX'] + 10, p['startY'] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        print(f'{p["sprite"]}\tSCORE: {p["maxVal"]}')
-    print('\n\n')
 
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
+def match(cuts) :
+    for cut in cuts:
+        match_cut(cut)
