@@ -3,7 +3,7 @@ import numpy as np
 
 from tools import image_util
 from tools import geom
-
+from tools import box_util
 
 
 def contour(image) :
@@ -73,9 +73,11 @@ def contour(image) :
     rounded[rounded < 0] = 0
 
     cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
+    
     #image_util.show(cut)
-
+    cut = image_util.remove_border(cut, 0.2)
     #save_img_cut(cut)
+
     if box_util.is_bad_cut(cut) :
         return None
     return cut
