@@ -87,10 +87,5 @@ def im_show():
     cv2.imshow("Image", image)
     cv2.waitKey(0)
 
-
-
-
-
-
-
-
+    # TODO: not really sure what is best to be returned
+    return team
