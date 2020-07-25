@@ -13,8 +13,10 @@ if __name__ == '__main__':
     boxes.append(1)
     
     # in the final version a list of painting matches and a list of person bbox
-    # have to be fed to the localize_people method
-    localize_people(matches, boxes)
+    # have to be fed to the localize_people method... The first list should
+    # contain the matches with only the highest confidence of the ENTIRE FRAME!
+
+    localize_people(results, boxes)
     """
     img = cv2.imread('rectified_imgs/rectified_45.jpg')
     resized = resize(img, 1200)
