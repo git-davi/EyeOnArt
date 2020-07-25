@@ -13,14 +13,15 @@ def localize_people(matches, p_boxes):
         try:
             data_f = open('material/data.csv')
         except Exception as e:
-            print("FILE EXCEPTION")
+            print("DATA FILE EXCEPTION")
             print(e)
         
         csv_reader = csv.DictReader(data_f)
+        
+        # voting system to decide the room
         votes = {}
-        # more than 1 painting can be recognized in a scene?
+        
         for m in matches:
-            print(m)
             for row in csv_reader:
                 if row["Image"] == m["sprite"]:
                     if row["Room"] in votes:

@@ -8,8 +8,6 @@ if __name__ == '__main__':
     
     # variables for testing purposes
     boxes = []
-    matches = []
-    matches.append(results)
     boxes.append(1)
     
     # in the final version a list of painting matches and a list of person bbox
@@ -17,6 +15,7 @@ if __name__ == '__main__':
     # contain the matches with only the highest confidence of the ENTIRE FRAME!
 
     localize_people(results, boxes)
+    
     """
     img = cv2.imread('rectified_imgs/rectified_45.jpg')
     resized = resize(img, 1200)
