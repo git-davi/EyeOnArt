@@ -20,7 +20,7 @@ It won't be pushed.
 $ python Pattern.py
 ```
 
-See the file ```Pattern.py``` for more info. 
+See the file ```Pattern.py``` for more info. People/painting localization has been added.
 
 ## Help
 ```shell
