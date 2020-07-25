@@ -25,7 +25,7 @@ def contour(image) :
 
     # try matching with all roi
     if len(lines) < 4 :
-        return image
+        return None
 
     # scale lines for kmeans
     lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
@@ -35,7 +35,7 @@ def contour(image) :
     try :
         _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
     except Exception :
-        return image
+        return None
     
     # lines descaling
     cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )
@@ -52,7 +52,7 @@ def contour(image) :
     try :
         inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
     except Exception :
-        return image
+        return None
 
     #for coord in inters:
     #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
@@ -66,7 +66,7 @@ def contour(image) :
     
     transform, _ = cv2.findHomography(ordered_points, rect_points)
     if transform is None :
-        return image
+        return None
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
     #image_util.show(warped_image)
