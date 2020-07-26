@@ -1,10 +1,50 @@
 import cv2
 import numpy as np
+import time
 
 from tools import image_util
 from tools import geom
+from tools import rectification_utils
 
 
+
+def alt_Countours(image):
+    img_countours = image.copy()
+    gray_scale = cv2.GaussianBlur(image, (7, 7), 1)
+    gray_scale = cv2.cvtColor(gray_scale, cv2.COLOR_BGR2GRAY)
+    img_canny = cv2.Canny(gray_scale, 50, 20)
+    image_util.show(img_canny)
+    kernel = np.ones((5, 5))
+    img_dilated = cv2.dilate(img_canny, kernel, iterations=1)
+    image_util.show(img_dilated)
+    getContours(img_dilated, img_countours)
+    image_util.show(img_countours)
+
+def getContours(src, out):
+    #contours, hierarchy = cv2.findContours(src, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(src, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    
+    cont = max(contours, key=cv2.contourArea)
+    cv2.drawContours(out, cont, -1, (255, 0, 255), 7)
+    
+    hull = cv2.convexHull(cont)
+    #print(len(approx))
+    hull_mask = np.zeros((src.shape[0],src.shape[1], 1), np.uint8)
+    hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
+    image_util.show(hull_mask)
+    param = cv2.arcLength(hull, True)
+    approx = cv2.approxPolyDP(hull, 0.02*param, True)
+
+    for pt in approx:
+        ziocan = (pt[0][0],pt[0][1])
+        print(ziocan)
+        hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
+    
+    image_util.show(hull_mask)
+    #approx_tup = [tuple(p[0]) for p in approx]
+    if len(approx) == 4:
+        # order the pts from tl -> tr -> br -> bl
+        pass
 
 def contour(image) :
     imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -91,4 +131,5 @@ def find_countours(image, boxes) :
     rectified = []
     for box in boxes :
         roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
-        rectified.append(contour(roi))
+        #rectified.append(contour(roi))
+        alt_Countours(roi)

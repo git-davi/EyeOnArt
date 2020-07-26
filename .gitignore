@@ -3,3 +3,4 @@ venv
 __pycache__
 tasks/__pycache__
 cfg
+.vscode
