@@ -12,17 +12,28 @@ def alt_Countours(image):
     img_countours = image.copy()
     gray_scale = cv2.GaussianBlur(image, (7, 7), 1)
     gray_scale = cv2.cvtColor(gray_scale, cv2.COLOR_BGR2GRAY)
-    img_canny = cv2.Canny(gray_scale, 50, 20)
+    image_util.show(gray_scale)
+    blank_image = np.zeros((gray_scale.shape[0],gray_scale.shape[1]), np.uint8)
+
+    # experimental color reduction
+    x = 0
+    for i in range(blank_image.shape[0]):
+        for j in range(blank_image.shape[1]):
+            blank_image[i][j] = int((int(gray_scale[i][j] / 32))*32)
+
+    image_util.show(blank_image)
+    img_canny = cv2.Canny(blank_image, 50, 20)
     image_util.show(img_canny)
     kernel = np.ones((5, 5))
     img_dilated = cv2.dilate(img_canny, kernel, iterations=1)
     image_util.show(img_dilated)
     getContours(img_dilated, img_countours)
     image_util.show(img_countours)
+    
 
 def getContours(src, out):
     #contours, hierarchy = cv2.findContours(src, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    contours, hierarchy = cv2.findContours(src, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(src, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     cont = max(contours, key=cv2.contourArea)
     cv2.drawContours(out, cont, -1, (255, 0, 255), 7)
@@ -37,14 +48,13 @@ def getContours(src, out):
 
     for pt in approx:
         ziocan = (pt[0][0],pt[0][1])
-        print(ziocan)
+        #print(ziocan)
         hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
     
     image_util.show(hull_mask)
     #approx_tup = [tuple(p[0]) for p in approx]
-    if len(approx) == 4:
-        # order the pts from tl -> tr -> br -> bl
-        pass
+    if len(approx) > 4:
+        print("Attenzione i punti trovati dalla convex HULL erano: ", len(approx))
 
 def contour(image) :
     imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
