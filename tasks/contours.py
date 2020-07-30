@@ -52,6 +52,9 @@ def contour(image) :
     except Exception :
         return None
 
+    if len(inters) != 4 :
+        return None
+
     #for coord in inters:
     #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
 
