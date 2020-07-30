@@ -12,7 +12,6 @@ def alt_Countours(image):
     img_countours = image.copy()
     gray_scale = cv2.GaussianBlur(image, (7, 7), 1)
     gray_scale = cv2.cvtColor(gray_scale, cv2.COLOR_BGR2GRAY)
-    image_util.show(gray_scale)
     blank_image = np.zeros((gray_scale.shape[0],gray_scale.shape[1]), np.uint8)
 
     # experimental color reduction
@@ -22,97 +21,18 @@ def alt_Countours(image):
             # from 256 to 8 shades of gray
             blank_image[i][j] = int((int(gray_scale[i][j] / 32))*32)
 
-    image_util.show(blank_image)
     img_canny = cv2.Canny(blank_image, 50, 20)
-    image_util.show(img_canny)
     kernel = np.ones((5, 5))
     img_dilated = cv2.dilate(img_canny, kernel, iterations=1)
-    image_util.show(img_dilated)
-    getContours(img_dilated, img_countours)
-    image_util.show(img_countours)
+    vertices = getContours(img_dilated, img_countours)
+
+    if vertices is None:
+        return None
+
+    # UPDATE THIS FUNCTION the concept is the same but now we have to calc the angle of segments
+    rect_points = geom.rectify_points(vertices)
     
-
-def getContours(src, out):
-    #contours, hierarchy = cv2.findContours(src, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    contours, hierarchy = cv2.findContours(src, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
-    cont = max(contours, key=cv2.contourArea)
-    cv2.drawContours(out, cont, -1, (255, 0, 255), 7)
-    
-    hull = cv2.convexHull(cont)
-    #print(len(approx))
-    hull_mask = np.zeros((src.shape[0],src.shape[1], 1), np.uint8)
-    hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
-    image_util.show(hull_mask)
-    param = cv2.arcLength(hull, True)
-    approx = cv2.approxPolyDP(hull, 0.02*param, True)
-
-    for pt in approx:
-        ziocan = (pt[0][0],pt[0][1])
-        #print(ziocan)
-        hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
-    
-    image_util.show(hull_mask)
-    #approx_tup = [tuple(p[0]) for p in approx]
-    if len(approx) > 4:
-        print("Attenzione i punti trovati dalla convex HULL erano: ", len(approx))
-
-def contour(image) :
-    imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    imgray_blurred = cv2.GaussianBlur(imgray, (5, 5), 1)
-    edges = cv2.Canny(imgray_blurred, 50, 20)
-    edges_dilated = cv2.dilate(edges, None, iterations=5)
-    contours, hierarchy = cv2.findContours(edges_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
-    cont = max(contours, key=cv2.contourArea)
-    hull = cv2.convexHull(cont)
-
-    hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
-    hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
-    #image_util.show(hull_mask)
-    
-    lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
-
-    if lines is None :
-        # try matching with all roi
-        return image
-
-    # scale lines for kmeans
-    lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
-    lines[:, :, 1], min_theta, max_theta = geom.feature_scaling(lines[:, :, 1])
-
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.01)
-    try :
-        _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-    except Exception :
-        return image
-    
-    # lines descaling
-    cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )
-    cluster_lines[:, 1] = geom.feature_descaling(cluster_lines[:, 1], min_theta, max_theta )
-    
-    # return lines in order t r b l
-    ordered_lines = geom.order_lines(cluster_lines)
-    horizontal_lines = np.array([ordered_lines[0], ordered_lines[2]])
-    vertical_lines = np.array([ordered_lines[1], ordered_lines[3]])
-
-    # debugging
-    #image_util.draw_lines(horizontal_lines, vertical_lines, image)
-
-    inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
-
-    #for coord in inters:
-    #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
-
-    # order points tl tr br bl
-    ordered_points = geom.order_points(inters)
-    rect_points = geom.rectify_points(ordered_points, ordered_lines)
-
-    #for point in rect_points :
-    #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
-    
-    transform, _ = cv2.findHomography(ordered_points, rect_points)
+    transform, _ = cv2.findHomography(vertices, rect_points)
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
     rounded = np.round(rect_points).astype(int)
@@ -123,19 +43,42 @@ def contour(image) :
     cut = image_util.remove_border(cut, 0.15)
     image_util.show(cut)
 
-    #save_img_cut(cut)
-
     return cut
+    
 
-def save_img_cut(img):
-    dir_path = 'rectified_imgs/'
-    file_name = '{}rectified_{}.jpg'.format(dir_path, np.random.randint(100, size=1)[0])
-    print('Img saved at: {}'.format(file_name))
-    image_util.show(img)
-    try:
-        cv2.imwrite(file_name, img)
-    except Exception as e:
-        print(e)
+def getContours(src, out):
+    #contours, hierarchy = cv2.findContours(src, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(src, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    cont = max(contours, key=cv2.contourArea)
+    cv2.drawContours(out, cont, -1, (255, 0, 255), 7)
+    
+    hull = cv2.convexHull(cont)
+
+    hull_mask = np.zeros((src.shape[0],src.shape[1], 1), np.uint8)
+    hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
+
+    param = cv2.arcLength(hull, True)
+    approx = cv2.approxPolyDP(hull, 0.02*param, True)
+
+
+    if len(approx) < 4 :
+        return None
+
+    # vertices in order tl bl br tr
+    vertices = geom.get_vertices(approx)
+
+    '''
+    for pt in vertices:
+        ziocan = (pt[0],pt[1])
+        print(ziocan)
+        hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
+    
+    image_util.show(hull_mask)
+    #approx_tup = [tuple(p[0]) for p in approx]
+    '''
+
+    return vertices
 
 
 def find_countours(image, boxes) :
@@ -143,4 +86,5 @@ def find_countours(image, boxes) :
     for box in boxes :
         roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
         #rectified.append(contour(roi))
-        alt_Countours(roi)
+        if roi is not None:
+            rectified.append(alt_Countours(roi))

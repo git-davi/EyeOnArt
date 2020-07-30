@@ -61,6 +61,27 @@ def order_points(points):
     return np.array([tl, tr, br, bl])
 
 
+def get_vertices(points):
+    points = np.array(points)
+
+    # order by vertical position
+    points = points[points[:, :, 1][:, 0].argsort()]
+    
+    bottom = points[:2]
+    top = points[-2:]
+
+    # order horizontal pos
+    top = top[top[:, :, 0][:, 0].argsort()]
+    bottom = bottom[bottom[:, :, 0][:, 0].argsort()]
+
+    tl = top[0, 0]
+    tr = top[1, 0]
+    bl = bottom[0, 0]
+    br = bottom[1, 0]
+
+    return np.array([tl, tr, br, bl])
+
+
 def order_lines(lines) :
     abs_cos = np.absolute(np.cos(lines[:, 1]))
     h_lines = lines[abs_cos.argsort()][:2]
