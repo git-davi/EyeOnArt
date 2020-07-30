@@ -7,11 +7,9 @@ from tools import box_util
 
 
 def contour(image) :
-    imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    imgray_blurred = cv2.GaussianBlur(imgray, (5, 5), 1)
-    edges = cv2.Canny(imgray_blurred, 50, 20)
-    edges_dilated = cv2.dilate(edges, None, iterations=5)
+    edges = cv2.Canny(image, 50, 20)
+    image_util.show(edges)
+    edges_dilated = cv2.dilate(edges, None, iterations=1)
     contours, hierarchy = cv2.findContours(edges_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     cont = max(contours, key=cv2.contourArea)
@@ -19,7 +17,6 @@ def contour(image) :
 
     hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
     hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
-    #image_util.show(hull_mask)
     
     lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
 
@@ -47,7 +44,8 @@ def contour(image) :
     vertical_lines = np.array([ordered_lines[1], ordered_lines[3]])
 
     # debugging
-    #image_util.draw_lines(horizontal_lines, vertical_lines, image)
+    image_util.draw_lines(horizontal_lines, vertical_lines, image)
+    image_util.show(image)
 
     try :
         inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
