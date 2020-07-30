@@ -16,9 +16,10 @@ def alt_Countours(image):
     blank_image = np.zeros((gray_scale.shape[0],gray_scale.shape[1]), np.uint8)
 
     # experimental color reduction
-    x = 0
+    
     for i in range(blank_image.shape[0]):
         for j in range(blank_image.shape[1]):
+            # from 256 to 8 shades of gray
             blank_image[i][j] = int((int(gray_scale[i][j] / 32))*32)
 
     image_util.show(blank_image)
