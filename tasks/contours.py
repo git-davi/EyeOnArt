@@ -29,9 +29,14 @@ def alt_Countours(image):
     if vertices is None:
         return None
 
-    # UPDATE THIS FUNCTION the concept is the same but now we have to calc the angle of segments
     rect_points = geom.rectify_points(vertices)
-    
+
+    '''
+    for point in rect_points :
+        cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
+    image_util.show(image)
+    '''
+
     transform, _ = cv2.findHomography(vertices, rect_points)
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
@@ -68,15 +73,14 @@ def getContours(src, out):
     # vertices in order tl bl br tr
     vertices = geom.get_vertices(approx)
 
-    '''
     for pt in vertices:
         ziocan = (pt[0],pt[1])
-        print(ziocan)
+        #print(ziocan)
         hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
     
     image_util.show(hull_mask)
     #approx_tup = [tuple(p[0]) for p in approx]
-    '''
+    
 
     return vertices
 
