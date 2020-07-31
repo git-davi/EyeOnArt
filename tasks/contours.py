@@ -26,13 +26,12 @@ def contour(image) :
     # vertices in order tl bl br tr
     vertices = geom.get_vertices(approx)
 
-    '''
     for pt in vertices:
         ziocan = (pt[0],pt[1])
         #print(ziocan)
         hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
-    '''
-    hull_mask = cv2.drawContours(hull_mask, [approx], -1, (255, 255, 255))
+    
+    #hull_mask = cv2.drawContours(hull_mask, [approx], -1, (255, 255, 255))
 
     image_util.show(hull_mask)
 
@@ -43,12 +42,14 @@ def contour(image) :
     #for point in rect_points :
     #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
     
+    image_util.show(image)
+
     transform, _ = cv2.findHomography(vertices, rect_points)
     if transform is None :
         return None
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
 
-    #image_util.show(warped_image)
+    image_util.show(warped_image)
 
     rounded = np.round(rect_points).astype(int)
     rounded[rounded < 0] = 0
