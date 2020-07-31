@@ -25,6 +25,11 @@ def contour(image) :
 
     # vertices in order tl bl br tr
     vertices = geom.get_vertices(approx)
+    print("original image vertices" + '\n')
+    print(vertices)
+    flag=is_it_a_fucking_rombo(vertices)
+    print("è un rombo?" + '\n')
+    print(flag)
 
     for pt in vertices:
         ziocan = (pt[0],pt[1])
@@ -37,10 +42,19 @@ def contour(image) :
 
     
     # order points tl tr br bl
-    rect_points = geom.rectify_points(vertices)
+    if(flag == False):
+        rect_points = geom.rectify_points(vertices)
+        print(rect_points)
+    elif (flag):
+        sorted_vertices= sort_rhombus(vertices)
+        print("sorted vertices" + '\n')
+        print(sorted_vertices)
+        rect_points=geom.rectify_rhombus(sorted_vertices)
+        print("These are the rectified points " + '\n')
+        print(rect_points)
 
-    #for point in rect_points :
-    #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
+    for point in rect_points :
+        cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
     
     image_util.show(image)
 
@@ -84,3 +98,37 @@ def find_countours(image, boxes) :
         if cut is not None :
             rectified.append(cut)
     return rectified
+
+def is_it_a_fucking_rombo(vertices):
+    tl,tr,br,bl = vertices
+    #altri controlli equivalenti br[1]-bl[1]
+    if(abs(tl[1]-tr[1]) > 70 ):
+        return True
+    else:
+        return False
+
+def sort_rhombus(vertices):
+    p1,p2,p3,p4=vertices
+    tl,tr,br,bl = [None, None, None, None]
+    min_x=10000
+    max_x=0
+    min_y=10000
+    max_y=0
+
+    for i in vertices:
+        if (i[0] <= min_x):
+            tl=i
+            min_x=i[0]
+    for i in vertices:
+        if (i[0] >= max_x):
+            br=i
+            max_x=i[0]
+    for i in vertices:
+        if (i[1] <= min_y):
+            tr=i
+            min_y=i[1]
+    for i in vertices:
+        if (i[1] >= max_y):
+            bl=i
+            max_y=i[1]
+    return np.array([tl, tr, br, bl])

@@ -139,3 +139,24 @@ def rectify_points(points) :
     new_bl = [new_tl[0], new_br[1]]
 
     return np.array([new_tl, new_tr, new_br, new_bl])
+
+def rectify_rhombus(points):
+        
+    tl, tr, br, bl = points
+    new_tl, new_tr, new_br, new_bl = [None, None, None, None]
+    #calculate middle y of the rhombus
+    new_my=np.round((tl[1]+br[1])/2)
+    #calulate middle x of the rhomus
+    new_mx=np.round((tr[0]+bl[0])/2)
+    #we keep the unique x,y that rhombus points don't share
+    new_lx=tl[0]
+    new_rx=br[0]
+    new_ty=tr[1]
+    new_by=bl[1]
+
+    new_tl=[new_lx,new_my]
+    new_tr=[new_mx,new_ty]
+    new_br=[new_rx,new_my]
+    new_bl=[new_mx,new_by]
+
+    return np.array([new_tl, new_tr, new_br, new_bl])
