@@ -8,7 +8,6 @@ from tools import box_util
 
 def contour(image) :
     edges = cv2.Canny(image, 50, 20)
-    image_util.show(edges)
     edges_dilated = cv2.dilate(edges, None, iterations=1)
     contours, hierarchy = cv2.findContours(edges_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -18,54 +17,33 @@ def contour(image) :
     hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
     hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
     
-    lines = cv2.HoughLines(hull_mask, 1, np.pi / 180, 100)
+    param = cv2.arcLength(hull, True)
+    approx = cv2.approxPolyDP(hull, 0.1*param, True)
 
-    # try matching with all roi
-    if len(lines) < 4 :
+    if len(approx) < 4 :
         return None
 
-    # scale lines for kmeans
-    lines[:, :, 0], min_rho, max_rho = geom.feature_scaling(lines[:, :, 0])
-    lines[:, :, 1], min_theta, max_theta = geom.feature_scaling(lines[:, :, 1])
+    # vertices in order tl bl br tr
+    vertices = geom.get_vertices(approx)
 
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.01)
-    try :
-        _, _, cluster_lines = cv2.kmeans(lines, 4, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-    except Exception :
-        return None
+    '''
+    for pt in vertices:
+        ziocan = (pt[0],pt[1])
+        #print(ziocan)
+        hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
+    '''
+    hull_mask = cv2.drawContours(hull_mask, [approx], -1, (255, 255, 255))
+
+    image_util.show(hull_mask)
+
     
-    # lines descaling
-    cluster_lines[:, 0] = geom.feature_descaling(cluster_lines[:, 0], min_rho, max_rho )
-    cluster_lines[:, 1] = geom.feature_descaling(cluster_lines[:, 1], min_theta, max_theta )
-    
-    # return lines in order t r b l
-    ordered_lines = geom.order_lines(cluster_lines)
-    horizontal_lines = np.array([ordered_lines[0], ordered_lines[2]])
-    vertical_lines = np.array([ordered_lines[1], ordered_lines[3]])
-
-    # debugging
-    image_util.draw_lines(horizontal_lines, vertical_lines, image)
-    image_util.show(image)
-
-    try :
-        inters = geom.segmented_intersections(horizontal_lines,vertical_lines)
-    except Exception :
-        return None
-
-    if len(inters) != 4 :
-        return None
-
-    #for coord in inters:
-    #    cv2.drawMarker(image,(round(coord[0]),round(coord[1])),(255,255,255))
-
     # order points tl tr br bl
-    ordered_points = geom.order_points(inters)
-    rect_points = geom.rectify_points(ordered_points, ordered_lines)
+    rect_points = geom.rectify_points(vertices)
 
     #for point in rect_points :
     #    cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
     
-    transform, _ = cv2.findHomography(ordered_points, rect_points)
+    transform, _ = cv2.findHomography(vertices, rect_points)
     if transform is None :
         return None
     warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))

@@ -70,6 +70,27 @@ def order_lines(lines) :
     return np.array([ top, right, bottom, left ])
 
 
+def get_vertices(points):
+    points = np.array(points)
+
+    # order by vertical position
+    points = points[points[:, :, 1][:, 0].argsort()]
+    
+    top = points[:2]
+    bottom = points[-2:]
+
+    # order horizontal pos
+    top = top[top[:, :, 0][:, 0].argsort()]
+    bottom = bottom[bottom[:, :, 0][:, 0].argsort()]
+
+    tl = top[0, 0]
+    tr = top[1, 0]
+    bl = bottom[0, 0]
+    br = bottom[1, 0]
+
+    return np.array([tl, tr, br, bl])
+
+
 def seg_len(p1, p2):
     x = p2[0] - p1[0]
     y = p2[1] - p1[1]
@@ -77,16 +98,20 @@ def seg_len(p1, p2):
     return np.sqrt(x*x + y*y)
 
 
-def rectify_points(points, lines) :
+def rectify_points(points) :
     tl, tr, br, bl = points
-    t, r, b, l = lines
+    # angles
+    top_a = np.arctan(np.abs(tl[1]-tr[1])/np.abs(tl[0]-tr[0]))
+    #left_a = np.arctan(np.abs(tl[0]-bl[0])/np.abs(tl[1]-bl[1]))
+    #bottom_a = np.arctan(np.abs(bl[1]-br[1])/np.abs(bl[0]-br[0]))
+    right_a = np.arctan(np.abs(tr[0]-br[0])/np.abs(tr[1]-br[1]))
 
     new_tl, new_tr, new_br, new_bl = [None, None, None, None]
 
     # get new_tl and new_tr
     if tl[1] < tr[1] :
         border = seg_len(tl, tr)
-        scale = np.abs(np.cos(t[1] - (np.pi/2)))
+        scale = np.abs(np.cos(top_a))
 
         new_x = tl[0] + border/scale
 
@@ -94,7 +119,7 @@ def rectify_points(points, lines) :
         new_tr = [new_x, tl[1]]
     else :
         border = seg_len(tl, tr)
-        scale = np.abs(np.cos(t[1] - (np.pi/2)))
+        scale = np.abs(np.cos(top_a))
 
         new_x = tr[0] - border/scale
 
@@ -104,7 +129,7 @@ def rectify_points(points, lines) :
     
     # get new br
     border = seg_len(new_tr, br)
-    scale = np.abs(np.cos(r[1]))
+    scale = np.abs(np.cos(right_a))
 
     new_y = new_tr[1] + border/scale
 
