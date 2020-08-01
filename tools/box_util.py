@@ -2,14 +2,14 @@ import cv2
 import numpy as np
 
 
-def box_drawer(img, boxes, color, label) :
-    for box in boxes :
-        x = box[0]
-        y = box[1]
-        w = box[2]
-        h = box[3]
+def box_drawer(img, box, color, label) :
+    
+    x = box[0]
+    y = box[1]
+    w = box[2]
+    h = box[3]
 
-        draw_bounding_box(img, label, color, x, y, x+w, y+h)
+    draw_bounding_box(img, label, color, x, y, x+w, y+h)
 
 
 def adjust_box(img, x, y, w, h) :

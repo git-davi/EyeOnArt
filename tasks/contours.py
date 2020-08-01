@@ -66,19 +66,17 @@ def save_img_cut(img):
         print(e)
 
 
-def find_countours(image, boxes) :
-    rectified = []
-    for box in boxes :
-        roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
-        cut = contour(roi)
-        if cut is not None :
-            rectified.append(cut)
-    return rectified
+def find_countours(image, box) :
+    roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
+    cut = contour(roi)
+    if cut is None :
+        return None
+    return cut
 
 def is_it_a_fucking_rombo(vertices):
     tl,tr,br,bl = vertices
     #altri controlli equivalenti br[1]-bl[1]
-    if(abs(tl[1]-tr[1]) > 150 ):
+    if(abs(tl[1]-tr[1]) > 95):
         return True
     else:
         return False

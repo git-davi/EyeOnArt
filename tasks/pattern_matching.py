@@ -51,8 +51,11 @@ def match_cut(cut):
                        multi_probe_level = 1)
             search_params = dict(checks = 50)
             
-            flann = cv2.FlannBasedMatcher(index_params, search_params)
-            matches = flann.knnMatch(des1,des2,k=2)
+            try:
+                flann = cv2.FlannBasedMatcher(index_params, search_params)
+                matches = flann.knnMatch(des1,des2,k=2)
+            except Exception:
+                continue
 
             # store all the good matches as per Lowe's ratio test.
             good = []
@@ -66,24 +69,29 @@ def match_cut(cut):
                 'score': len(good)
             })
 
+    if not matches_list:
+        return [{
+            'file': None,
+            'score': -1
+        }]
+
     matches_list = list(sorted(matches_list, key=lambda k: k['score'], reverse=True))
     
     print(f'Best match is FILE : {matches_list[0]["file"]}')
     print(f'SCORE : {matches_list[0]["score"]}')
     print(f'2nd SCORE : {matches_list[1]["score"]}')
 
-    return matches_list[0]
     # debug
     #image_util.show(cut)
     #image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
 
+    return matches_list
 
-def match(cuts) :
-    best = []
-    for cut in cuts:
-        best.append(match_cut(cut))
-    
-    best = list(sorted(best, key=lambda k: k['score'], reverse=True))
-    max_conf = best[0]
-    print(max_conf)
-    return max_conf
+
+def match(cut) :
+    best = match_cut(cut)
+
+    #best = list(sorted(best, key=lambda k: k['score'], reverse=True))
+    if best['file'] is None :
+        return None
+    return best
