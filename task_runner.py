@@ -10,8 +10,9 @@ def start(image) :
     # painting detection
     print("Detecting ROI for paintings")
     painting_boxes = detection.detect(image, painting_net, painting_classes)
-    #box_util.box_drawer(image, painting_boxes, (0, 255, 0), "painting")
-    #image_util.show(image)
+    view = image.copy()
+    box_util.box_drawer(view, painting_boxes, (0, 255, 0), "painting")
+    image_util.show(view)
 
     # painting rectification
     print("Rectifing frame and cutting the paintings")
