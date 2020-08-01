@@ -11,6 +11,12 @@ Setup the python environment :
 $ pip install -r requirements.txt
 ```
 
+## Output
+The outputs will be placed in the `output` dir.  
+There will be a view for each frame containing the bounding boxes for every detected painting.
+On top of every ROI you will find the title for the best match.
+Every function (that represents a step) of the pipeline is returning the requested output.  
+  
 
 ## Usage Example
 ```shell
