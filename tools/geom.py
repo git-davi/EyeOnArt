@@ -197,4 +197,4 @@ def rectify_rhombus_v2(points):
     plt.show()
     '''
     # invert top and bottom to respect opencv order l t r b
-    return np.round(np.array([l, b, r, t]))
+    return np.array([l, b, r, t])

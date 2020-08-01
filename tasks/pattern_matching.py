@@ -6,9 +6,6 @@ from tools import image_util
 
 
 def match_cut(cut):
-    # debug
-    image_util.show(cut)
-
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
 
     h, w = gray.shape[:2]
@@ -59,6 +56,7 @@ def match_cut(cut):
     print(f'SCORE : {matches_list[0]["score"]}')
 
     # debug
+    image_util.show(cut)
     image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
 
 
