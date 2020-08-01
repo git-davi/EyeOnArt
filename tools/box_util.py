@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 
 def box_drawer(img, boxes, color, label) :
@@ -48,3 +49,9 @@ def remove_fake_people(painting_boxes, people_boxes) :
                 break
 
     return real_people_boxes
+
+def is_bad_cut(cut) :
+    s_min, s_max = np.sort(cut.shape[:2])
+    if s_min == 0 or s_max/s_min > 5 :
+        return True
+    return False

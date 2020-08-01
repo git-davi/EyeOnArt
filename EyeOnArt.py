@@ -36,7 +36,7 @@ Painting Detection project.
 |/
 
 Credits :
-Davide Casalini, Robert Covic & Stefano Rossi.
+Davide Casalini, Robert Covic & Stefano Rossi
 '''
 )
 parser.add_argument("filename", type=str, help="The filename to the source video you want to elaborate")
@@ -50,6 +50,8 @@ success, image = video.read()
 count = 1
 while(success) :
     print("------ Tasks started on frame {} out of {} ------".format(count, length))
+    #if image.shape[0] < image.shape[1]:
+    #    image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
     task_runner.start(image)
     success, image = video.read()
     count += 1
