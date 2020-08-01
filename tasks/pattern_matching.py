@@ -7,6 +7,7 @@ from tools import image_util
 
 def match_cut(cut):
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray,(5,5),0)
 
     h, w = gray.shape[:2]
 
