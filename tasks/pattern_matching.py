@@ -72,11 +72,18 @@ def match_cut(cut):
     print(f'SCORE : {matches_list[0]["score"]}')
     print(f'2nd SCORE : {matches_list[1]["score"]}')
 
+    return matches_list[0]
     # debug
     #image_util.show(cut)
     #image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
 
 
 def match(cuts) :
+    best = []
     for cut in cuts:
-        match_cut(cut)
+        best.append(match_cut(cut))
+    
+    best = list(sorted(best, key=lambda k: k['score'], reverse=True))
+    max_conf = best[0]
+    print(max_conf)
+    return max_conf

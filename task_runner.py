@@ -4,6 +4,7 @@ from tools import box_util
 from tools import image_util
 from tasks import contours
 from tasks import pattern_matching
+from tasks import people_detection
 
 
 def start(image) :
@@ -21,7 +22,8 @@ def start(image) :
 
     # painting retrieval
     print("Retrival for painting from DB")
-    pattern_matching.match(cuts)
+    best_match = []
+    best_match.append(pattern_matching.match(cuts))
 
 
     # people detection
@@ -33,3 +35,7 @@ def start(image) :
     #image_util.show(image)
 
     # people localization
+    # test people
+
+    #people_boxes.append(1)
+    people_detection.localize_people(best_match,people_boxes)
