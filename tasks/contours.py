@@ -25,37 +25,43 @@ def contour(image) :
 
     # vertices in order tl bl br tr
     vertices = geom.get_vertices(approx)
-    print("original image vertices" + '\n')
-    print(vertices)
+    #print("original image vertices" + '\n')
+    #print(vertices)
     flag=is_it_a_fucking_rombo(vertices)
-    print("è un rombo?" + '\n')
-    print(flag)
+    #print("è un rombo?" + '\n')
+    #print(flag)
 
+    
     for pt in vertices:
         ziocan = (pt[0],pt[1])
         #print(ziocan)
         hull_mask = cv2.circle(hull_mask, ziocan, 30, (255, 0, 0), 10)
     
-    #hull_mask = cv2.drawContours(hull_mask, [approx], -1, (255, 255, 255))
+
+    hull_mask = cv2.drawContours(hull_mask, [approx], -1, (255, 255, 255))
 
     image_util.show(hull_mask)
-
     
+
     # order points tl tr br bl
     if(flag == False):
         rect_points = geom.rectify_points(vertices)
-        print(rect_points)
+        #print(rect_points)
     elif (flag):
         sorted_vertices= sort_rhombus(vertices)
-        print("sorted vertices" + '\n')
-        print(sorted_vertices)
-        rect_points=geom.rectify_rhombus(sorted_vertices)
-        print("These are the rectified points " + '\n')
-        print(rect_points)
+        #print("sorted vertices" + '\n')
+        #print(sorted_vertices)
+        #rect_points=geom.rectify_rhombus(sorted_vertices)
+        rect_points = geom.rectify_rhombus_v2(sorted_vertices)
+        #print(test)
+        #print("These are the rectified points " + '\n')
+        #print(rect_points)
+        vertices = sorted_vertices
 
+    '''
     for point in rect_points :
         cv2.drawMarker(image,(round(point[0]),round(point[1])),(0,0,255))
-    
+    '''
     image_util.show(image)
 
     transform, _ = cv2.findHomography(vertices, rect_points)

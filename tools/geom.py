@@ -140,6 +140,7 @@ def rectify_points(points) :
 
     return np.array([new_tl, new_tr, new_br, new_bl])
 
+
 def rectify_rhombus(points):
         
     tl, tr, br, bl = points
@@ -160,3 +161,40 @@ def rectify_rhombus(points):
     new_bl=[new_mx,new_by]
 
     return np.array([new_tl, new_tr, new_br, new_bl])
+
+
+import matplotlib.pyplot as plt
+
+def rectify_rhombus_v2(points):
+    # rotate points 45 degrees draw a square then rotate the points back (-45 degrees)
+    _, t, r, b = points
+
+    side = np.sqrt((t[0]-r[0])*(t[0]-r[0]) + (t[1]-r[1])*(t[1]-r[1]))
+    traslation = (t[0], side - t[1])
+
+    # rotation matrix
+    rot = np.array([[np.cos(-1*np.pi/4), -1*np.sin(-1*np.pi/4)], [np.sin(-1*np.pi/4), np.cos(-1*np.pi/4)]])
+
+    tl = [-1*side/2, side/2]
+    tr = [side/2, side/2]
+    br = [side/2, -1*side/2]
+    bl = [-1*side/2, -1*side/2]
+    
+    #print(np.array([new_bl, new_tl, new_tr, new_br]))
+    
+    t = rot @ tl
+    r = rot @ tr
+    b = rot @ br
+    l = rot @ bl
+
+    t += traslation
+    l += traslation
+    r += traslation
+    b += traslation
+    '''
+    test = np.round(np.array([l, t, r, b]))
+    plt.scatter(test[:, 0], test[:, 1])
+    plt.show()
+    '''
+    # invert top and bottom to respect opencv order l t r b
+    return np.round(np.array([l, b, r, t]))
