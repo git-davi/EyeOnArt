@@ -78,7 +78,7 @@ def find_countours(image, boxes) :
 def is_it_a_fucking_rombo(vertices):
     tl,tr,br,bl = vertices
     #altri controlli equivalenti br[1]-bl[1]
-    if(abs(tl[1]-tr[1]) > 70 ):
+    if(abs(tl[1]-tr[1]) > 150 ):
         return True
     else:
         return False
