@@ -50,6 +50,8 @@ success, image = video.read()
 count = 1
 while(success) :
     print("------ Tasks started on frame {} out of {} ------".format(count, length))
+    #if image.shape[0] < image.shape[1]:
+    #    image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
     task_runner.start(image)
     success, image = video.read()
     count += 1

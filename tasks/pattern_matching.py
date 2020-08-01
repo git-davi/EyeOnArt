@@ -5,8 +5,22 @@ import numpy as np
 from tools import image_util
 
 
+def increase_brightness(img, value=30):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+
+    lim = 255 - value
+    v[v > lim] = 255
+    v[v <= lim] += value
+
+    final_hsv = cv2.merge((h, s, v))
+    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    return img
+
+
 def match_cut(cut):
     # increase brightness
+    cut = increase_brightness(cut, 10)
 
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
     
@@ -56,11 +70,11 @@ def match_cut(cut):
     
     print(f'Best match is FILE : {matches_list[0]["file"]}')
     print(f'SCORE : {matches_list[0]["score"]}')
-    #print(f'2nd SCORE : {matches_list[1]["score"]}')
+    print(f'2nd SCORE : {matches_list[1]["score"]}')
 
     # debug
-    image_util.show(cut)
-    image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
+    #image_util.show(cut)
+    #image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
 
 
 def match(cuts) :
