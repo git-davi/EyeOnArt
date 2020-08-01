@@ -4,7 +4,12 @@ The videos are captured in the art museum Galleria Estense, Modena.
 
 ## Setup
 Download the weights and cfg file from [here](https://drive.google.com/file/d/11VwWheCa8JXgEKCqbhdf5c9FO9z3-ihY/view?usp=sharing).  
-Unzip the directory in the root dir of the project.
+Unzip the directory in the root dir of the project.  
+  
+Setup the python environment :
+```shell
+$ pip install -r requirements.txt
+```
 
 
 ## Usage Example
