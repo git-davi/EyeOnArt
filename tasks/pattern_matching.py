@@ -6,9 +6,10 @@ from tools import image_util
 
 
 def match_cut(cut):
-    gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray,(5,5),0)
+    # increase brightness
 
+    gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
+    
     h, w = gray.shape[:2]
 
     MIN_MATCH_COUNT = 3
@@ -21,7 +22,7 @@ def match_cut(cut):
 
             template = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
 
-            patchSize = 16
+            patchSize = 32
 
             orb = cv2.ORB_create(edgeThreshold = patchSize,
                                     patchSize = patchSize)
@@ -43,7 +44,7 @@ def match_cut(cut):
             good = []
             for pair in matches:
                 if len(pair) == 2:
-                    if pair[0].distance < 0.75*pair[1].distance:
+                    if pair[0].distance < 0.5*pair[1].distance:
                         good.append(pair[0])
 
             matches_list.append({
@@ -55,6 +56,7 @@ def match_cut(cut):
     
     print(f'Best match is FILE : {matches_list[0]["file"]}')
     print(f'SCORE : {matches_list[0]["score"]}')
+    #print(f'2nd SCORE : {matches_list[1]["score"]}')
 
     # debug
     image_util.show(cut)
