@@ -40,6 +40,7 @@ Davide Casalini, Robert Covic & Stefano Rossi
 '''
 )
 parser.add_argument("filename", type=str, help="The filename to the source video you want to elaborate")
+parser.add_argument('--skip', type=int, dest='skip', default=0, metavar="N_FRAME",help="The number of frames to skip")
 args = parser.parse_args()
 
 
@@ -47,12 +48,13 @@ video = cv2.VideoCapture(args.filename)
 length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
 success, image = video.read()
-count = 1
+count = 0
 while(success) :
-    print("------ Tasks started on frame {} out of {} ------".format(count, length))
-    #if image.shape[0] < image.shape[1]:
-    #    image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-    task_runner.start(image, count)
+    
+    if count % (args.skip + 1) == 0 :
+        print("------ Tasks started on frame {} out of {} ------".format(count+1, length))
+        task_runner.start(image, count)
+    
     success, image = video.read()
     count += 1
 

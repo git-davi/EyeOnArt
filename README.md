@@ -25,7 +25,7 @@ $ python EyeOnArt.py material/test.mp4
   
 ## Help
 ```shell
-usage: EyeOnArt.py [-h] filename
+usage: EyeOnArt.py [-h] [--skip N_FRAME] filename
 
 -------------
 |  EyeOnArt |
@@ -57,11 +57,12 @@ Painting Detection project.
 |/
 
 Credits :
-Davide Casalini, Robert Covic & Stefano Rossi.
+Davide Casalini, Robert Covic & Stefano Rossi
 
 positional arguments:
-  filename    The filename to the source video you want to elaborate
+  filename        The filename to the source video you want to elaborate
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help      show this help message and exit
+  --skip N_FRAME  The number of frames to skip
 ```

@@ -55,17 +55,6 @@ def contour(image) :
     return cut
 
 
-def save_img_cut(img):
-    dir_path = 'rectified_imgs/'
-    file_name = '{}rectified_{}.jpg'.format(dir_path, np.random.randint(100, size=1)[0])
-    print('Img saved at: {}'.format(file_name))
-    image_util.show(img)
-    try:
-        cv2.imwrite(file_name, img)
-    except Exception as e:
-        print(e)
-
-
 def find_countours(image, box) :
     roi = image[box[1]:box[1]+box[3], box[0]:box[0]+box[2]]
     cut = contour(roi)

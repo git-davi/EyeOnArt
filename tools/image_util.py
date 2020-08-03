@@ -2,13 +2,26 @@ import cv2
 import numpy as np
 
 
-def show(image):
+def show(image, label):
     # display output image    
-    cv2.imshow("object detection", image)
+    cv2.imshow(label, image)
     # wait until any key is pressed
     cv2.waitKey()
     # release resources
     cv2.destroyAllWindows()
+
+
+
+def save_img_cut(img, label, index):
+    dir_path = 'output/'
+    file_name = f'{dir_path}{label}_{index}.jpg'
+
+    show(img, f'{label}_{index}')
+    try:
+        cv2.imwrite(file_name, img)
+        print('Img saved at: {}'.format(file_name))
+    except Exception as e:
+        print(e)
 
 
 def draw_lines(horizontal_lines, vertical_lines, image) :

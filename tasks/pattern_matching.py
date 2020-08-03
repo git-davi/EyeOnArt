@@ -18,7 +18,7 @@ def increase_brightness(img, value=30):
     return img
 
 
-def match_cut(cut):
+def match_cut(cut, paint_db):
     # increase brightness
     cut = increase_brightness(cut, 10)
 
@@ -31,11 +31,7 @@ def match_cut(cut):
 
     matches_list = []
 
-    for f in os.listdir("material/paintings_db/"):
-        for file in glob.glob(f'material/paintings_db/{f}'):
-
-            template = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-
+    for f, template in paint_db.items():
             patchSize = 32
 
             orb = cv2.ORB_create(edgeThreshold = patchSize,
@@ -77,9 +73,9 @@ def match_cut(cut):
 
     matches_list = list(sorted(matches_list, key=lambda k: k['score'], reverse=True))
     
-    print(f'Best match is FILE : {matches_list[0]["file"]}')
-    print(f'SCORE : {matches_list[0]["score"]}')
-    print(f'2nd SCORE : {matches_list[1]["score"]}')
+    #print(f'Best match is FILE : {matches_list[0]["file"]}')
+    #print(f'SCORE : {matches_list[0]["score"]}')
+    #print(f'2nd SCORE : {matches_list[1]["score"]}')
 
     # debug
     #image_util.show(cut)
@@ -87,7 +83,7 @@ def match_cut(cut):
 
     return matches_list
 
-
+'''
 def match(cut) :
     best = match_cut(cut)
 
@@ -95,3 +91,4 @@ def match(cut) :
     if best['file'] is None :
         return None
     return best
+'''
