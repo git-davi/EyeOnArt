@@ -11,6 +11,9 @@ def contour(image) :
     edges_dilated = cv2.dilate(edges, None, iterations=1)
     contours, hierarchy = cv2.findContours(edges_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
+    if not contours:
+        return None
+
     cont = max(contours, key=cv2.contourArea)
     hull = cv2.convexHull(cont)
 
