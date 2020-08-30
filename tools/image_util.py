@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 
 def show(image, label):
@@ -14,6 +15,9 @@ def show(image, label):
 
 def save_img_cut(img, label, index):
     dir_path = 'output/'
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     file_name = f'{dir_path}{label}_{index}.jpg'
 
     show(img, f'{label}_{index}')

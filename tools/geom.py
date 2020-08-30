@@ -40,34 +40,25 @@ def feature_descaling(features, _min, _max) :
     return (features * (_max - _min)) + _min
 
 
-def order_points(points):
-    # order points : tl tr br bl
-    points = np.array(points)
-
-    points = points[points[:, 0].argsort()]
-    left = points[0:2]
-    right = points[2:4]
-
-    left = left[left[:, 1].argsort()]
-    right = right[right[:, 1].argsort()]
-
-    tl = left[0]
-    bl = left[1]
-    tr = right[0]
-    br = right[1]
-
-    return np.array([tl, tr, br, bl])
-
-
-def order_lines(lines) :
-    abs_cos = np.absolute(np.cos(lines[:, 1]))
-    h_lines = lines[abs_cos.argsort()][:2]
-    v_lines = lines[abs_cos.argsort()][2:]
-
-    top, bottom = h_lines[h_lines[:, 0].argsort()]
-    left, right = v_lines[v_lines[:, 0].argsort()]
-
-    return np.array([ top, right, bottom, left ])
+def order_points(pts):
+	# initialzie a list of coordinates that will be ordered
+	# such that the first entry in the list is the top-left,
+	# the second entry is the top-right, the third is the
+	# bottom-right, and the fourth is the bottom-left
+	rect = np.zeros((4, 2), dtype = "float32")
+	# the top-left point will have the smallest sum, whereas
+	# the bottom-right point will have the largest sum
+	s = pts.sum(axis = 1)
+	rect[0] = pts[np.argmin(s)]
+	rect[2] = pts[np.argmax(s)]
+	# now, compute the difference between the points, the
+	# top-right point will have the smallest difference,
+	# whereas the bottom-left will have the largest difference
+	diff = np.diff(pts, axis = 1)
+	rect[1] = pts[np.argmin(diff)]
+	rect[3] = pts[np.argmax(diff)]
+	# return the ordered coordinates
+	return rect
 
 
 def get_vertices(points):
@@ -98,103 +89,14 @@ def seg_len(p1, p2):
     return np.sqrt(x*x + y*y)
 
 
-def rectify_points(points) :
-    tl, tr, br, bl = points
-    # angles
-    top_a = np.arctan(np.abs(tl[1]-tr[1])/np.abs(tl[0]-tr[0]))
-    #left_a = np.arctan(np.abs(tl[0]-bl[0])/np.abs(tl[1]-bl[1]))
-    #bottom_a = np.arctan(np.abs(bl[1]-br[1])/np.abs(bl[0]-br[0]))
-    right_a = np.arctan(np.abs(tr[0]-br[0])/np.abs(tr[1]-br[1]))
+def rectify(points):
+    # tl tr br bl order
+    width = max(int(seg_len(points[0], points[1])), int(seg_len(points[2], points[3])))
+    height = max(int(seg_len(points[0], points[3])), int(seg_len(points[1], points[2])))
 
-    new_tl, new_tr, new_br, new_bl = [None, None, None, None]
+    tl = [0, 0]
+    tr = [width - 1, 0]
+    br = [width - 1, height - 1]
+    bl = [0, height - 1]
 
-    # get new_tl and new_tr
-    if tl[1] < tr[1] :
-        border = seg_len(tl, tr)
-        scale = np.abs(np.cos(top_a))
-
-        new_x = tl[0] + border/scale
-
-        new_tl = tl
-        new_tr = [new_x, tl[1]]
-    else :
-        border = seg_len(tl, tr)
-        scale = np.abs(np.cos(top_a))
-
-        new_x = tr[0] - border/scale
-
-        new_tl = [new_x, tr[1]]
-        new_tr = tr
-
-    
-    # get new br
-    border = seg_len(new_tr, br)
-    scale = np.abs(np.cos(right_a))
-
-    new_y = new_tr[1] + border/scale
-
-    new_br = [tr[0], new_y]
-
-    # get new_bl
-    new_bl = [new_tl[0], new_br[1]]
-
-    return np.array([new_tl, new_tr, new_br, new_bl])
-
-
-def rectify_rhombus(points):
-        
-    tl, tr, br, bl = points
-    new_tl, new_tr, new_br, new_bl = [None, None, None, None]
-    #calculate middle y of the rhombus
-    new_my=np.round((tl[1]+br[1])/2)
-    #calulate middle x of the rhomus
-    new_mx=np.round((tr[0]+bl[0])/2)
-    #we keep the unique x,y that rhombus points don't share
-    new_lx=tl[0]
-    new_rx=br[0]
-    new_ty=tr[1]
-    new_by=bl[1]
-
-    new_tl=[new_lx,new_my]
-    new_tr=[new_mx,new_ty]
-    new_br=[new_rx,new_my]
-    new_bl=[new_mx,new_by]
-
-    return np.array([new_tl, new_tr, new_br, new_bl])
-
-
-import matplotlib.pyplot as plt
-
-def rectify_rhombus_v2(points):
-    # rotate points 45 degrees draw a square then rotate the points back (-45 degrees)
-    _, t, r, b = points
-
-    side = np.sqrt((t[0]-r[0])*(t[0]-r[0]) + (t[1]-r[1])*(t[1]-r[1]))
-    traslation = (t[0], side - t[1])
-
-    # rotation matrix
-    rot = np.array([[np.cos(-1*np.pi/4), -1*np.sin(-1*np.pi/4)], [np.sin(-1*np.pi/4), np.cos(-1*np.pi/4)]])
-
-    tl = [-1*side/2, side/2]
-    tr = [side/2, side/2]
-    br = [side/2, -1*side/2]
-    bl = [-1*side/2, -1*side/2]
-    
-    #print(np.array([new_bl, new_tl, new_tr, new_br]))
-    
-    t = rot @ tl
-    r = rot @ tr
-    b = rot @ br
-    l = rot @ bl
-
-    t += traslation
-    l += traslation
-    r += traslation
-    b += traslation
-    '''
-    test = np.round(np.array([l, t, r, b]))
-    plt.scatter(test[:, 0], test[:, 1])
-    plt.show()
-    '''
-    # invert top and bottom to respect opencv order l t r b
-    return np.array([l, b, r, t])
+    return np.array([tl, tr, br, bl])

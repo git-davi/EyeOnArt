@@ -5,11 +5,18 @@ from tools import image_util
 from tools import geom
 from tools import box_util
 
+from netloader import *
+
 
 def contour(image) :
-    edges = cv2.Canny(image, 80, 40)
-    edges_dilated = cv2.dilate(edges, None, iterations=1)
-    contours, hierarchy = cv2.findContours(edges_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    # apply segmentation prediction
+    r = model.detect([image], verbose=1)[0]
+
+    mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
+    mask[r['masks']] = 255
+
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     if not contours:
         return None
@@ -17,45 +24,25 @@ def contour(image) :
     cont = max(contours, key=cv2.contourArea)
     hull = cv2.convexHull(cont)
 
-    hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
-    hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
+    #hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
+    #hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
     
     param = cv2.arcLength(hull, True)
-    approx = cv2.approxPolyDP(hull, 0.1*param, True)
+    approx = cv2.approxPolyDP(hull, 0.05*param, True)
 
     if len(approx) < 4 :
         return None
 
     # vertices in order tl bl br tr
     vertices = geom.get_vertices(approx)
-    flag=is_it_a_fucking_rombo(vertices)
+    rectif = geom.rectify(vertices)
 
-    # order points tl tr br bl
-    if(flag == False):
-        rect_points = geom.rectify_points(vertices)
-    elif (flag):
-        sorted_vertices= sort_rhombus(vertices)
-        rect_points = geom.rectify_rhombus_v2(sorted_vertices)
-        vertices = sorted_vertices
-
-    transform, _ = cv2.findHomography(vertices, rect_points)
+    transform, _ = cv2.findHomography(vertices, rectif)
     if transform is None :
         return None
-    warped_image = cv2.warpPerspective(image, transform, (image.shape[1], image.shape[0]))
+    warped_image = cv2.warpPerspective(image, transform, (rectif[2, 0], rectif[2, 1]))
 
-    rounded = np.round(rect_points).astype(int)
-    rounded[rounded < 0] = 0
-
-    if flag :
-        cut = warped_image[rounded[0, 0]:rounded[2,0], rounded[1, 1]:rounded[3, 1]]
-    else :
-        cut = warped_image[rounded[0, 1]:rounded[2, 1], rounded[0, 0]:rounded[2, 0]]
-
-    cut = image_util.remove_border(cut, 0.1)
-
-    #if box_util.is_bad_cut(cut) :
-    #    return None
-    return cut
+    return warped_image
 
 
 def find_countours(image, box) :
