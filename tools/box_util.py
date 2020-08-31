@@ -41,8 +41,8 @@ def remove_fake_people(painting_boxes, people_boxes) :
             conditions = []
             conditions.append(person[0] > painting[0])
             conditions.append(person[1] > painting[1])
-            conditions.append(person[2] < painting[2])
-            conditions.append(person[3] < painting[3])
+            conditions.append(person[2] + person[1] < painting[2] + painting[1])
+            conditions.append(person[3] + person[0] < painting[3] + painting[0])
 
             if all(conditions) :
                 real_people_boxes.remove(person)
