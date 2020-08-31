@@ -31,4 +31,4 @@ tqdm==4.48.1
 typed-ast==1.4.1
 wrapt==1.12.1
 tensorflow==1.14
-Keras=2.1.0
+Keras==2.1.0
