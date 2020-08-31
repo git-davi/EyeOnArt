@@ -10,7 +10,7 @@ from netloader import *
 
 def contour(image) :
     # apply segmentation prediction
-    r = model.detect([image], verbose=1)[0]
+    r = model.detect([image])[0]
     if r['masks'].shape[2] == 2 :
         r_mask = r['masks'][:, :, 0]
     else :
@@ -30,8 +30,8 @@ def contour(image) :
     #hull_mask = np.zeros((image.shape[0],image.shape[1], 1), np.uint8)
     #hull_mask = cv2.drawContours(hull_mask, [hull], -1, (255, 255, 255))
     
-    test = image.copy()
-    test = cv2.drawContours(test, [hull], -1, (0, 255, 0))
+    #test = image.copy()
+    #test = cv2.drawContours(test, [hull], -1, (0, 255, 0))
     #image_util.show(test, "contour")
 
     param = cv2.arcLength(hull, True)
