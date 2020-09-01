@@ -32,7 +32,7 @@ def match_cut(cut, paint_db):
     matches_list = []
 
     for f, template in paint_db.items():
-            patchSize = 32
+            patchSize = 24
 
             orb = cv2.ORB_create(edgeThreshold = patchSize,
                                     patchSize = patchSize)
@@ -57,7 +57,7 @@ def match_cut(cut, paint_db):
             good = []
             for pair in matches:
                 if len(pair) == 2:
-                    if pair[0].distance < 0.5*pair[1].distance:
+                    if pair[0].distance < 0.6*pair[1].distance:
                         good.append(pair[0])
 
             matches_list.append({
@@ -73,6 +73,12 @@ def match_cut(cut, paint_db):
 
     matches_list = list(sorted(matches_list, key=lambda k: k['score'], reverse=True))
     
+    if matches_list[0]["score"] < 10 :
+        return [{
+            'file': None,
+            'score': -1
+        }]
+
     #print(f'Best match is FILE : {matches_list[0]["file"]}')
     #print(f'SCORE : {matches_list[0]["score"]}')
     #print(f'2nd SCORE : {matches_list[1]["score"]}')
