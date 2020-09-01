@@ -29,6 +29,7 @@ def start(image, index) :
         cut = contours.find_countours(image, box)
 
         if cut is None :
+            box_util.box_drawer(view, box, (0, 255, 0), "rectification failed")
             continue
 
         # painting retrieval
