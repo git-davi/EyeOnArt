@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 from tools import image_util
 
+from dbloader import *
+
 
 def increase_brightness(img, value=30):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -18,12 +20,13 @@ def increase_brightness(img, value=30):
     return img
 
 
-def match_cut(cut, paint_db):
+def match_cut(cut):
     # increase brightness
     cut = increase_brightness(cut, 10)
 
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
-    
+    kp2, des2 = orb.detectAndCompute(gray, None)
+
     h, w = gray.shape[:2]
 
     MIN_MATCH_COUNT = 3
@@ -31,24 +34,8 @@ def match_cut(cut, paint_db):
 
     matches_list = []
 
-    for f, template in paint_db.items():
-            patchSize = 24
-
-            orb = cv2.ORB_create(edgeThreshold = patchSize,
-                                    patchSize = patchSize)
-
-            kp1, des1 = orb.detectAndCompute(template, None)
-            kp2, des2 = orb.detectAndCompute(gray, None)
-
-            FLANN_INDEX_LSH = 6
-            index_params= dict(algorithm = FLANN_INDEX_LSH,
-                       table_number = 6,
-                       key_size = 12,
-                       multi_probe_level = 1)
-            search_params = dict(checks = 50)
-            
+    for f, des1 in des_db.items():
             try:
-                flann = cv2.FlannBasedMatcher(index_params, search_params)
                 matches = flann.knnMatch(des1,des2,k=2)
             except Exception:
                 continue
@@ -73,7 +60,7 @@ def match_cut(cut, paint_db):
 
     matches_list = list(sorted(matches_list, key=lambda k: k['score'], reverse=True))
     
-    if matches_list[0]["score"] < 10 :
+    if matches_list[0]["score"] < 5 :
         return [{
             'file': None,
             'score': -1
@@ -84,8 +71,8 @@ def match_cut(cut, paint_db):
     #print(f'2nd SCORE : {matches_list[1]["score"]}')
 
     # debug
-    #image_util.show(cut)
-    #image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'))
+    #image_util.show(cut, 'cut')
+    #image_util.show(cv2.imread(f'material/paintings_db/{matches_list[0]["file"]}'), 'db')
 
     return matches_list
 

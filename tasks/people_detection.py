@@ -1,38 +1,65 @@
-import os
 import cv2
 import numpy as np
-from tools import image_util
-import pandas as pd
+from tools import box_util
 
 
-# people localization is based on painting matches:
-# according to the reference namefile we can get 
-# the location that is defined in data.csv file
+def get_output_layers(net):
+    layer_names = net.getLayerNames()
+    output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-def localize_people(matches, p_boxes, data):
+    return output_layers
 
-    if len(p_boxes) <= 0 :
-        print("No people detected in this frame")
-        return
-    else :
-        print("Detected some people...")
 
-    if matches:
-        best_match = max(matches, key=lambda x: x['score'])
+def detect(image, net, classes) :
+    Width = image.shape[1]
+    Height = image.shape[0]
+    scale = 0.00392
 
-        best_info = data.loc[best_match['file']]
-        room = best_info['Room']
+    blob = cv2.dnn.blobFromImage(image, scale, (416,416), (0, 0, 0), True, crop=False)
+    net.setInput(blob)
+    outs = net.forward(get_output_layers(net))
 
-        print("Detected ", len(p_boxes), "person/people in room ", room)
-        display_localization(room)
+    # initializing
+    class_ids = []
+    confidences = []
+    boxes = []
+    conf_threshold = 0.5
+    nms_threshold = 0.4
+
+    # for each detetion from each output layer 
+    # get the confidence, class id, bounding box params
+    # and ignore weak detections (confidence < 0.5)
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            # detect only Person and painting (which are at index zero)
+            if class_id != 0 :
+                continue
+            confidence = scores[class_id]
+            if confidence > 0.5:
+                center_x = int(detection[0] * Width)
+                center_y = int(detection[1] * Height)
+                w = int(detection[2] * Width)
+                h = int(detection[3] * Height)
+                x = center_x - w / 2
+                y = center_y - h / 2
+                class_ids.append(class_id)
+                confidences.append(float(confidence))
+
+                adj_box = box_util.adjust_box(image, x, y, w, h)
+                boxes.append(adj_box)
+
+    # apply non-max suppression
+    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+
+    # go through the detections remaining
+    # after nms and draw bounding box
+    final_boxes = []
+    for i in indices:
+        i = i[0]
+        box = boxes[i]
         
+        final_boxes.append(box)
 
-def display_localization(result):
-    rooms = pd.read_csv('material/rooms.csv', index_col='Room')
-    map_image = cv2.imread('material/map.png')
-    
-    room = rooms.loc[result]
-
-    map_image = cv2.circle(map_image, (int(room['X']),int(room['Y'])), 20, (0,0,255), 5)
-    
-    image_util.show(map_image, 'map')
+    return final_boxes

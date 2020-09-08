@@ -4,14 +4,13 @@ import cv2
 print("Loading neural nets and classes...")
 
 # YOLO
-painting_net = cv2.dnn.readNet('cfg/weights/painting_w.weights', 'cfg/net/painting_c.cfg')
-painting_classes = ['painting']
-
-people_net = cv2.dnn.readNet('cfg/weights/people_w.weights', 'cfg/net/people_c.cfg')
-people_classes = []
+yolo_net = cv2.dnn.readNet('cfg/yolov3.weights', 'cfg/yolov3.cfg')
+yolo_classes = ['person']
+'''
+yolo_classes = []
 with open('cfg/coco/people.names') as f:
     people_classes = [line.strip() for line in f.readlines()]
-
+'''
 
 # MASK_RCNN
 import logging
@@ -50,8 +49,6 @@ config = InferenceConfig()
 
 model = modellib.MaskRCNN(mode="inference", 
                         config=config,
-                        model_dir="cfg/mask_rcnn")
+                        model_dir="cfg")
 
-model.load_weights("cfg/mask_rcnn/mask_rcnn_painting.h5", by_name=True)
-
-print("Loaded")
+model.load_weights("cfg/mask_rcnn_painting.h5", by_name=True)

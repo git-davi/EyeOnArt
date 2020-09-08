@@ -38,11 +38,20 @@ def remove_fake_people(painting_boxes, people_boxes) :
     real_people_boxes = people_boxes.copy()
     for person in people_boxes :
         for painting in painting_boxes :
+            # expand painting box
+            w_scale = painting[2] * 0.1
+            h_scale = painting[3] * 0.1
+
+            painting[0] = painting[0] - w_scale
+            painting[1] = painting[1] - h_scale
+            painting[2] = painting[2] + (w_scale*2)
+            painting[3] = painting[3] + (h_scale*2)
+
             conditions = []
             conditions.append(person[0] > painting[0])
             conditions.append(person[1] > painting[1])
-            conditions.append(person[2] + person[1] < painting[2] + painting[1])
-            conditions.append(person[3] + person[0] < painting[3] + painting[0])
+            conditions.append(person[3] + person[1] < painting[3] + painting[1])
+            conditions.append(person[2] + person[0] < painting[2] + painting[0])
 
             if all(conditions) :
                 real_people_boxes.remove(person)
