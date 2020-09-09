@@ -6,7 +6,7 @@ from tools import image_util
 
 from dbloader import *
 
-
+'''
 def increase_brightness(img, value=30):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
@@ -18,12 +18,13 @@ def increase_brightness(img, value=30):
     final_hsv = cv2.merge((h, s, v))
     img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
     return img
-
+'''
 
 def match_cut(cut):
-    # increase brightness
-    cut = increase_brightness(cut, 10)
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
+    # increase brightness
+    gray = gray + 10
+    # sharpen image
     kernel = np.array([
         [0, -1, 0],
         [-1, 5, -1],
