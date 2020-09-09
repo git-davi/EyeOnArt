@@ -23,14 +23,15 @@ def increase_brightness(img, value=30):
 def match_cut(cut):
     # increase brightness
     cut = increase_brightness(cut, 10)
-
     gray = cv2.cvtColor(cut, cv2.COLOR_BGR2GRAY)
-    kp2, des2 = orb.detectAndCompute(gray, None)
+    kernel = np.array([
+        [0, -1, 0],
+        [-1, 5, -1],
+        [0, -1, 0]
+    ])
+    sharp = cv2.filter2D(gray, -1, kernel)
 
-    h, w = gray.shape[:2]
-
-    MIN_MATCH_COUNT = 3
-    MAX_MATCH = 0
+    kp2, des2 = orb.detectAndCompute(sharp, None)
 
     matches_list = []
 

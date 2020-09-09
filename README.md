@@ -3,7 +3,7 @@ Computer Vision project for painting detection from videos.
 The videos are captured in the art museum Galleria Estense, Modena.
 
 ## Setup
-Download the weights and cfg file from [here](https://drive.google.com/file/d/1utMuzSDWmEqHpgwEaQIHUb-7-X0jUgw4/view?usp=sharing).  
+Download the weights and cfg file from [here](https://drive.google.com/file/d/1cQfSZnJememvvT7jVZx_KU5w86RQxgAV/view?usp=sharing).  
 Unzip the directory in the root dir of the project.  
   
 Setup the python environment :
